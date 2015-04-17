@@ -1,0 +1,58 @@
+buildscript {
+    ext {
+        springBootVersion = '1.2.3.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}") 
+        classpath("io.spring.gradle:dependency-management-plugin:0.4.1.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea' 
+apply plugin: 'spring-boot'
+apply plugin: 'io.spring.dependency-management'
+
+jar {
+    baseName = 'organization-structure'
+    version = '0.0.1-SNAPSHOT'
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+
+dependencies {
+    compile("com.vaadin:vaadin-spring-boot-starter:1.0.0.beta2")
+    compile 'org.mongodb:mongo-java-driver:2.13.0'
+    compile 'com.google.code.gson:gson:2.3.1'
+    compile 'com.google.guava:guava:18.0'
+    compile 'javax.persistence:persistence-api:1.0.2'
+
+    testCompile("org.springframework.boot:spring-boot-starter-test") 
+}
+
+dependencyManagement {
+	imports { 
+		mavenBom "com.vaadin:vaadin-bom:7.4.2" 
+	}
+}
+
+
+eclipse {
+    classpath {
+         containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
+         containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8'
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.3'
+}
