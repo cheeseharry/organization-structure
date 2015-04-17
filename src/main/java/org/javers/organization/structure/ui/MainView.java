@@ -4,20 +4,25 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.UI;
+import org.javers.organization.structure.infrastructure.DataInitializer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @SpringUI
 public class MainView extends UI {
 
     private Controller controller;
+    private DataInitializer dataInitializer;
 
     @Autowired
-    public MainView(Controller controller) {
+    public MainView(Controller controller, DataInitializer dataInitializer) {
         this.controller = controller;
+        this.dataInitializer = dataInitializer;
     }
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
+        dataInitializer.populate();
+
         HorizontalLayout mainLayout = new HorizontalLayout();
         OrganizationTree organizationTree = new OrganizationTree(controller);
         PersonForm userForm = new PersonForm(controller);

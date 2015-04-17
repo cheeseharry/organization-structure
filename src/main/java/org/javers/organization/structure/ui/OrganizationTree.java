@@ -1,6 +1,7 @@
 package org.javers.organization.structure.ui;
 
 import com.vaadin.data.Item;
+import com.vaadin.data.Property;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.event.DataBoundTransferable;
 import com.vaadin.event.Transferable;
@@ -9,61 +10,66 @@ import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptAll;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.shared.ui.dd.VerticalDropLocation;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Tree;
+import com.vaadin.ui.VerticalLayout;
 import org.javers.organization.structure.domain.Employee;
 import org.javers.organization.structure.domain.Hierarchy;
 
-import java.util.Iterator;
 import java.util.List;
 
 public class OrganizationTree extends CustomComponent {
 
-    final HierarchicalContainer container = new HierarchicalContainer();
+    private final VerticalLayout verticalLayout = new VerticalLayout();
+    private final ComboBox comboBox = new ComboBox("Hierarchy: ");
+    ;
+    private final Tree tree = new Tree();
+    private final HierarchicalContainer container = new HierarchicalContainer();
+
+    private List<Hierarchy> hierarchies;
+    private Hierarchy selected;
 
     public OrganizationTree(Controller controller) {
+        setCompositionRoot(verticalLayout);
         setSizeFull();
-        Tree sample = new Tree();
-        sample.setSizeFull();
-        setCompositionRoot(sample);
+        tree.setSizeFull();
+        verticalLayout.addComponent(comboBox);
+        verticalLayout.addComponent(tree);
 
-        List<Hierarchy> hierarchies = controller.getAllHierachies();
-        Hierarchy first = hierarchies.get(0);
+        hierarchies = controller.getHierarchyList();
+        selected = hierarchies.get(0);
+        comboBox.addItems(hierarchies);
+        comboBox.select(selected);
+        comboBox.setImmediate(true);
+        comboBox.setNullSelectionAllowed(false);
+        comboBox.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+                selected = (Hierarchy) comboBox.getValue();
+                container.removeAllItems();
+                populateContainer(selected);
+            }
+        });
+
+        hierarchies.forEach(i -> comboBox.setItemCaption(i, i.getHierarchyName()));
         container.addContainerProperty("login", String.class, null);
-        createContainer(first);
-
-        sample.setContainerDataSource(container);
-        sample.setItemCaptionPropertyId("login");
-
-
-        // Populate the tree
-
-
-//        sample.setItemIconPropertyId(ExampleUtil.hw_PROPERTY_ICON);
-
-        // Allow all nodes to have children
-        for (final Object itemId : sample.getItemIds()) {
-            sample.setChildrenAllowed(itemId, true);
-        }
-
-        // Expand all nodes
-        for (final Iterator<?> it = sample.rootItemIds().iterator(); it
-                .hasNext(); ) {
-            sample.expandItemsRecursively(it.next());
-        }
-        sample.setDragMode(Tree.TreeDragMode.NODE);
-        sample.setDropHandler(new TreeSortDropHandler(sample, container));
-
+        tree.setContainerDataSource(container);
+        tree.setItemCaptionPropertyId("login");
+        tree.setDragMode(Tree.TreeDragMode.NODE);
+        tree.setDropHandler(new TreeSortDropHandler(tree, container));
+        populateContainer(selected);
     }
 
-    private void createContainer(Hierarchy first) {
+    private void populateContainer(Hierarchy first) {
         Employee root = first.getRoot();
 
         addSubordinates(root);
+        tree.rootItemIds().forEach(i -> tree.expandItemsRecursively(i));
     }
 
     private void addSubordinates(Employee root) {
-        for (Employee e: root.getAllEmployees()) {
+        for (Employee e : root.getAllEmployees()) {
             Item item = container.addItem(e);
             item.getItemProperty("login").setValue(e.getLogin());
             container.setParent(e, root);
@@ -71,6 +77,7 @@ public class OrganizationTree extends CustomComponent {
         }
     }
 
+    //MAGIC
     private static class TreeSortDropHandler implements DropHandler {
         private final Tree tree;
 

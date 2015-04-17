@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.javers.organization.structure.domain.Hierarchy;
 import org.javers.organization.structure.domain.Person;
 import org.javers.organization.structure.infrastructure.DataInitializer;
+import org.javers.organization.structure.infrastructure.HierarchyRepository;
 import org.javers.organization.structure.infrastructure.MongoPersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,16 +16,19 @@ public class Controller {
 
     private MongoPersonRepository personRepository;
 
+    private HierarchyRepository hierarchyRepository;
+
     @Autowired
-    public Controller(MongoPersonRepository personRepository) {
+    public Controller(MongoPersonRepository personRepository, HierarchyRepository hierarchyRepository) {
         this.personRepository = personRepository;
+        this.hierarchyRepository = hierarchyRepository;
     }
 
     public void updatePerson(Person person) {
         personRepository.update(person);
     }
 
-    public List<Hierarchy> getAllHierachies() {
-        return Lists.newArrayList(DataInitializer.getHierachy());
+    public List<Hierarchy> getHierarchyList() {
+        return hierarchyRepository.findAll();
     }
 }

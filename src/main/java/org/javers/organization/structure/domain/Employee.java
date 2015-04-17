@@ -1,9 +1,8 @@
 package org.javers.organization.structure.domain;
 
 import com.google.common.collect.ImmutableList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +12,10 @@ import java.util.List;
  */
 //@Document
 public class Employee implements Serializable {
-    private static final Logger logger = LoggerFactory.getLogger(Employee.class);
-
-//    @Id
+    @Id
     private String login;
 
-//    @Transient
-    private Employee boss;
+    private transient Employee boss;
 
     private List<Employee> subordinates = new ArrayList<>();
 
@@ -32,14 +28,11 @@ public class Employee implements Serializable {
     }
 
     public Employee addSubordinates(List<Employee> subordinates){
-//        Preconditions.checkArgument(subordinates != null);
         subordinates.forEach(s-> addSubordinate(s));
         return this;
     }
 
     public Employee addSubordinate(Employee subordinate){
-//        Preconditions.checkArgument(subordinate != null);
-
         if (subordinate.boss!=null){
             subordinate.boss.subordinates.remove(subordinate);
         }
@@ -47,12 +40,14 @@ public class Employee implements Serializable {
 
         subordinates.add(subordinate);
 
-        //logger.info("subordinate [{}] has a new boss [{}]", subordinate.getLogin(), this.getLogin());
-
         return this;
     }
 
     public List<Employee> getAllEmployees() {
         return ImmutableList.copyOf(subordinates);
+    }
+
+    public Employee getSubordinate(String name) {
+        return subordinates.stream().filter(s -> s.getLogin().equals(name)).findFirst().get();
     }
 }
