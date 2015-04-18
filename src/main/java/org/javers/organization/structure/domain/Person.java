@@ -11,9 +11,6 @@ public class Person {
     private String lastName;
     private Sex sex;
     private Integer salary;
-    private String street;
-    private String city;
-    private String postCode;
     private Position position;
 
     public Person() {
@@ -83,30 +80,6 @@ public class Person {
 
     public void setSalary(Integer salary) {
         this.salary = salary;
-    }
-
-    public String getStreet() {
-        return street;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getPostCode() {
-        return postCode;
-    }
-
-    public void setPostCode(String postCode) {
-        this.postCode = postCode;
     }
 
     public Position getPosition() {

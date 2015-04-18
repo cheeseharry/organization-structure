@@ -12,6 +12,7 @@ import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.shared.ui.dd.VerticalDropLocation;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 import org.javers.organization.structure.domain.Employee;
@@ -22,7 +23,7 @@ import java.util.List;
 public class OrganizationTree extends CustomComponent {
 
     private final VerticalLayout verticalLayout = new VerticalLayout();
-    private final ComboBox comboBox = new ComboBox("Hierarchy: ");
+    private final ComboBox comboBox = new ComboBox();
     ;
     private final Tree tree = new Tree();
     private final HierarchicalContainer container = new HierarchicalContainer();
@@ -31,7 +32,11 @@ public class OrganizationTree extends CustomComponent {
     private Hierarchy selected;
 
     public OrganizationTree(Controller controller) {
-        setCompositionRoot(verticalLayout);
+        Panel panel = new Panel();
+        panel.setHeight("650px");
+        verticalLayout.setMargin(true);
+        panel.setContent(verticalLayout);
+        setCompositionRoot(panel);
         setSizeFull();
         tree.setSizeFull();
         verticalLayout.addComponent(comboBox);

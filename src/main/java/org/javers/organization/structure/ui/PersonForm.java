@@ -5,6 +5,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import org.javers.organization.structure.domain.Person;
 
@@ -13,9 +14,15 @@ public class PersonForm extends CustomComponent {
     private final BeanFieldGroup<Person> binder = new BeanFieldGroup(Person.class);
 
     public PersonForm(Controller controller) {
+        Panel panel = new Panel();
+
         FormLayout form = new FormLayout();
+        form.setMargin(true);
+
+        panel.setContent(form);
+        panel.setHeight("650px");
         Button save = new Button("save");
-        setCompositionRoot(form);
+        setCompositionRoot(panel);
 
         binder.setBuffered(false);
         binder.setItemDataSource(new Person());
