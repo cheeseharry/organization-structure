@@ -1,9 +1,5 @@
 package org.javers.organization.structure.domain;
 
-import com.google.common.collect.ImmutableList;
-
-import javax.persistence.Id;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,15 +7,16 @@ import java.util.List;
  * @author bartosz walacik
  */
 //@Document
-public class Employee implements Serializable {
-    @Id
-    private String login;
+public class Employee {
 
+    private long id;
+    private String login;
     private transient Employee boss;
 
     private List<Employee> subordinates = new ArrayList<>();
 
-    public Employee(String login) {
+    public Employee(long id, String login) {
+        this.id = id;
         this.login = login;
     }
 
@@ -27,13 +24,13 @@ public class Employee implements Serializable {
         return login;
     }
 
-    public Employee addSubordinates(List<Employee> subordinates){
-        subordinates.forEach(s-> addSubordinate(s));
+    public Employee addSubordinates(List<Employee> subordinates) {
+        subordinates.forEach(s -> addSubordinate(s));
         return this;
     }
 
-    public Employee addSubordinate(Employee subordinate){
-        if (subordinate.boss!=null){
+    public Employee addSubordinate(Employee subordinate) {
+        if (subordinate.boss != null) {
             subordinate.boss.subordinates.remove(subordinate);
         }
         subordinate.boss = this;
@@ -43,11 +40,24 @@ public class Employee implements Serializable {
         return this;
     }
 
+    public void removeSubordinate(Employee employee) {
+        subordinates.remove(employee);
+    }
+
+    public void setBoss(Employee boss) {
+        this.boss = boss;
+    }
+
     public List<Employee> getAllEmployees() {
-        return ImmutableList.copyOf(subordinates);
+        return subordinates;
     }
 
     public Employee getSubordinate(String name) {
         return subordinates.stream().filter(s -> s.getLogin().equals(name)).findFirst().get();
     }
+
+    public long getId() {
+        return id;
+    }
 }
+

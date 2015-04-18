@@ -57,7 +57,17 @@ public class OrganizationTree extends CustomComponent {
         tree.setContainerDataSource(container);
         tree.setItemCaptionPropertyId("login");
         tree.setDragMode(Tree.TreeDragMode.NODE);
-        tree.setDropHandler(new TreeSortDropHandler(tree, container));
+        tree.setDropHandler(new TreeSortDropHandler(tree, container, selected, controller));
+
+        tree.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+                Employee e = (Employee) tree.getValue();
+                controller.employeeSelected(e);
+
+            }
+        });
+
         populateContainer(selected);
     }
 
@@ -80,15 +90,21 @@ public class OrganizationTree extends CustomComponent {
     //MAGIC
     private static class TreeSortDropHandler implements DropHandler {
         private final Tree tree;
+        private final HierarchicalContainer container;
+        private final Hierarchy selected;
+        private final Controller controller;
 
         /**
          * Tree must use {@link HierarchicalContainer}.
          *
          * @param tree
+         * @param selected
          */
-        public TreeSortDropHandler(final Tree tree,
-                                   final HierarchicalContainer container) {
+        public TreeSortDropHandler(final Tree tree, final HierarchicalContainer container, Hierarchy selected, Controller controller) {
             this.tree = tree;
+            this.container = container;
+            this.selected = selected;
+            this.controller = controller;
         }
 
         @Override
@@ -101,31 +117,29 @@ public class OrganizationTree extends CustomComponent {
 
         @Override
         public void drop(final DragAndDropEvent dropEvent) {
-            // Called whenever a drop occurs on the component
-
-            // Make sure the drag source is the same tree
             final Transferable t = dropEvent.getTransferable();
-
-            // see the comment in getAcceptCriterion()
-            if (t.getSourceComponent() != tree
-                    || !(t instanceof DataBoundTransferable)) {
+            if (t.getSourceComponent() != tree || !(t instanceof DataBoundTransferable)) {
                 return;
             }
-
-            final Tree.TreeTargetDetails dropData = ((Tree.TreeTargetDetails) dropEvent
-                    .getTargetDetails());
-
+            final Tree.TreeTargetDetails dropData = ((Tree.TreeTargetDetails) dropEvent.getTargetDetails());
             final Object sourceItemId = ((DataBoundTransferable) t).getItemId();
-            // FIXME: Why "over", should be "targetItemId" or just
-            // "getItemId"
             final Object targetItemId = dropData.getItemIdOver();
-
-            // Location describes on which part of the node the drop took
-            // place
             final VerticalDropLocation location = dropData.getDropLocation();
+
+            Employee source = (Employee) sourceItemId;
+            Employee oldBoss = (Employee) container.getParent(sourceItemId);
+            if (oldBoss != null) {
+                oldBoss.removeSubordinate(source);
+            }
 
             moveNode(sourceItemId, targetItemId, location);
 
+
+            Employee target = (Employee) container.getParent(sourceItemId);
+
+            source.setBoss(target);
+            target.addSubordinate(source);
+            controller.updateHierarchy(selected);
         }
 
         /**

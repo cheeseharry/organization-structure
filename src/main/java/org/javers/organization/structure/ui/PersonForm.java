@@ -10,17 +10,15 @@ import org.javers.organization.structure.domain.Person;
 
 public class PersonForm extends CustomComponent {
 
-    final FormLayout form = new FormLayout();
-    final Button save = new Button("save");
-    private final Controller controller;
+    private final BeanFieldGroup<Person> binder = new BeanFieldGroup(Person.class);
 
     public PersonForm(Controller controller) {
-        this.controller = controller;
+        FormLayout form = new FormLayout();
+        Button save = new Button("save");
         setCompositionRoot(form);
-        final BeanFieldGroup<Person> binder = new BeanFieldGroup<Person>(Person.class);
+
         binder.setBuffered(false);
-        Person person = new Person();
-        binder.setItemDataSource(person);
+        binder.setItemDataSource(new Person());
 
         for (final Object propertyId : binder.getUnboundPropertyIds()) {
             Field field = binder.buildAndBind(propertyId);
@@ -37,5 +35,9 @@ public class PersonForm extends CustomComponent {
             Person p = b.getItemDataSource().getBean();
             controller.updatePerson(p);
         });
+    }
+
+    public void selectPerson(Person person) {
+        binder.setItemDataSource(person);
     }
 }

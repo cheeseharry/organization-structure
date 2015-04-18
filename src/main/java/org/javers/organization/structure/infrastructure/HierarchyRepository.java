@@ -1,6 +1,7 @@
 package org.javers.organization.structure.infrastructure;
 
 import com.google.gson.Gson;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -36,5 +37,10 @@ public class HierarchyRepository {
         return StreamSupport.stream(coursor.spliterator(), false)
                 .map((o) -> gson.fromJson(JSON.serialize(o), Hierarchy.class))
                 .collect(Collectors.toList());
+    }
+
+    public void updateHierarchy(Hierarchy selected) {
+        db.getCollection(COLLECTION_NAME)
+                .findAndModify(new BasicDBObject("hierarchyName", selected.getHierarchyName()), (DBObject) JSON.parse(gson.toJson(selected)));
     }
 }

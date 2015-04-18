@@ -4,35 +4,36 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.UI;
+import org.javers.organization.structure.domain.Person;
 import org.javers.organization.structure.infrastructure.DataInitializer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @SpringUI
 public class MainView extends UI {
 
-    private Controller controller;
-    private DataInitializer dataInitializer;
+    private OrganizationTree organizationTree;
+    private PersonForm personForm;
 
     @Autowired
     public MainView(Controller controller, DataInitializer dataInitializer) {
-        this.controller = controller;
-        this.dataInitializer = dataInitializer;
+        dataInitializer.populate();
+        organizationTree = new OrganizationTree(controller);
+        personForm = new PersonForm(controller);
+        controller.injectView(this);
     }
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-        dataInitializer.populate();
-
         HorizontalLayout mainLayout = new HorizontalLayout();
-        OrganizationTree organizationTree = new OrganizationTree(controller);
-        PersonForm userForm = new PersonForm(controller);
-
         mainLayout.setSizeFull();
         setContent(mainLayout);
         mainLayout.addComponent(organizationTree);
-        mainLayout.addComponent(userForm);
+        mainLayout.addComponent(personForm);
         mainLayout.setExpandRatio(organizationTree, 3f);
-        mainLayout.setExpandRatio(userForm, 7f);
+        mainLayout.setExpandRatio(personForm, 7f);
     }
 
+    public void selectPersonOnForm(Person person) {
+        personForm.selectPerson(person);
+    }
 }

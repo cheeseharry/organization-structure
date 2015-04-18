@@ -1,14 +1,11 @@
 package org.javers.organization.structure.domain;
 
-//import com.google.common.base.Preconditions;
-//import org.apache.commons.lang3.StringUtils;
-
 /**
  * @author bartosz walacik
  */
 public class Person {
 
-    private long id;
+    private Long id;
     private String login;
     private String firstName;
     private String lastName;
@@ -22,6 +19,20 @@ public class Person {
     public Person() {
     }
 
+    public Person(long id, String login, String firstName, String lastName, Sex sex) {
+        this.id = id;
+        this.login = login;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.sex = sex;
+    }
+
+    public Person assignPosition(Position position, int salary) {
+        this.position = position;
+        this.salary = salary;
+        return this;
+    }
+
     public String getLogin() {
         return login;
     }
@@ -30,7 +41,11 @@ public class Person {
         this.login = login;
     }
 
-    public long getId() {
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
         return id;
     }
 
@@ -100,6 +115,10 @@ public class Person {
 
     public void setPosition(Position position) {
         this.position = position;
+    }
+
+    public Employee toEmployee() {
+        return new Employee(id, login);
     }
 }
 

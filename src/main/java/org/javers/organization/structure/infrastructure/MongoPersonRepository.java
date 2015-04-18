@@ -34,4 +34,10 @@ public class MongoPersonRepository {
         DBObject dbObject = (DBObject) JSON.parse(gson.toJson(person));
         mongo.getCollection(COLLECTION_NAME).save(dbObject);
     }
+
+    public Person findPerson(long id) {
+        DBObject dbObject = mongo.getCollection(COLLECTION_NAME).findOne(new BasicDBObject("id", id));
+
+        return gson.fromJson(JSON.serialize(dbObject), Person.class);
+    }
 }

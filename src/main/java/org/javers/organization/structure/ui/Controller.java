@@ -1,9 +1,8 @@
 package org.javers.organization.structure.ui;
 
-import com.google.common.collect.Lists;
+import org.javers.organization.structure.domain.Employee;
 import org.javers.organization.structure.domain.Hierarchy;
 import org.javers.organization.structure.domain.Person;
-import org.javers.organization.structure.infrastructure.DataInitializer;
 import org.javers.organization.structure.infrastructure.HierarchyRepository;
 import org.javers.organization.structure.infrastructure.MongoPersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,7 @@ public class Controller {
     private MongoPersonRepository personRepository;
 
     private HierarchyRepository hierarchyRepository;
+    private MainView mainView;
 
     @Autowired
     public Controller(MongoPersonRepository personRepository, HierarchyRepository hierarchyRepository) {
@@ -30,5 +30,19 @@ public class Controller {
 
     public List<Hierarchy> getHierarchyList() {
         return hierarchyRepository.findAll();
+    }
+
+    public void updateHierarchy(Hierarchy selected) {
+        hierarchyRepository.updateHierarchy(selected);
+    }
+
+    public void employeeSelected(Employee e) {
+        Person person = personRepository.findPerson(e.getId());
+
+        mainView.selectPersonOnForm(person);
+    }
+
+    public void injectView(MainView mainView) {
+        this.mainView = mainView;
     }
 }
