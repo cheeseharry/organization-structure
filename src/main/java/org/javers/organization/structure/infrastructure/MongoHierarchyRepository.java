@@ -7,6 +7,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import org.javers.organization.structure.domain.Hierarchy;
+import org.javers.organization.structure.domain.HierarchyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,22 +16,24 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Component
-public class HierarchyRepository {
+public class MongoHierarchyRepository implements HierarchyRepository {
 
     public static final String COLLECTION_NAME = Hierarchy.class.getSimpleName();
     private DB db;
     private final Gson gson;
 
     @Autowired
-    public HierarchyRepository(DB db, Gson gson) {
+    public MongoHierarchyRepository(DB db, Gson gson) {
         this.db = db;
         this.gson = gson;
     }
 
+    @Override
     public void save(Hierarchy hierarchy) {
         db.getCollection(COLLECTION_NAME).save((DBObject) JSON.parse(gson.toJson(hierarchy)));
     }
 
+    @Override
     public List<Hierarchy> findAll() {
         DBCursor coursor = db.getCollection(COLLECTION_NAME).find();
 
@@ -39,7 +42,8 @@ public class HierarchyRepository {
                 .collect(Collectors.toList());
     }
 
-    public void updateHierarchy(Hierarchy selected) {
+    @Override
+    public void update(Hierarchy selected) {
         db.getCollection(COLLECTION_NAME)
                 .findAndModify(new BasicDBObject("hierarchyName", selected.getHierarchyName()), (DBObject) JSON.parse(gson.toJson(selected)));
     }

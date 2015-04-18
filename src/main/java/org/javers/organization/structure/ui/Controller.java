@@ -2,9 +2,9 @@ package org.javers.organization.structure.ui;
 
 import org.javers.organization.structure.domain.Employee;
 import org.javers.organization.structure.domain.Hierarchy;
+import org.javers.organization.structure.domain.HierarchyService;
 import org.javers.organization.structure.domain.Person;
-import org.javers.organization.structure.infrastructure.HierarchyRepository;
-import org.javers.organization.structure.infrastructure.MongoPersonRepository;
+import org.javers.organization.structure.domain.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,31 +13,31 @@ import java.util.List;
 @Component
 public class Controller {
 
-    private MongoPersonRepository personRepository;
+    private PersonService personService;
 
-    private HierarchyRepository hierarchyRepository;
+    private HierarchyService hierarchyService;
     private MainView mainView;
 
     @Autowired
-    public Controller(MongoPersonRepository personRepository, HierarchyRepository hierarchyRepository) {
-        this.personRepository = personRepository;
-        this.hierarchyRepository = hierarchyRepository;
+    public Controller(PersonService personService, HierarchyService hierarchyService) {
+        this.personService = personService;
+        this.hierarchyService = hierarchyService;
     }
 
     public void updatePerson(Person person) {
-        personRepository.update(person);
+        personService.update(person);
     }
 
     public List<Hierarchy> getHierarchyList() {
-        return hierarchyRepository.findAll();
+        return hierarchyService.findAll();
     }
 
     public void updateHierarchy(Hierarchy selected) {
-        hierarchyRepository.updateHierarchy(selected);
+        hierarchyService.update(selected);
     }
 
     public void employeeSelected(Employee e) {
-        Person person = personRepository.findPerson(e.getId());
+        Person person = personService.findPerson(e.getId());
 
         mainView.selectPersonOnForm(person);
     }

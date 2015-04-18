@@ -1,6 +1,7 @@
 package org.javers.organization.structure.infrastructure;
 
 import com.google.gwt.thirdparty.guava.common.collect.Lists;
+import com.mongodb.DB;
 import org.javers.organization.structure.domain.Employee;
 import org.javers.organization.structure.domain.Hierarchy;
 import org.javers.organization.structure.domain.Person;
@@ -71,12 +72,18 @@ public class DataInitializer {
     }
 
     @Autowired
-    private HierarchyRepository hierarchyRepository;
+    private MongoHierarchyRepository hierarchyRepository;
     
     @Autowired
     private MongoPersonRepository mongoPersonRepository;
 
+    @Autowired
+    private DB db;
+
     public void populate() {
+        db.getCollection(Person.class.getSimpleName()).drop();
+        db.getCollection(Hierarchy.class.getSimpleName()).drop();
+
         persons.forEach(p -> mongoPersonRepository.save(p));
 
         hierarchyRepository.save(new Hierarchy(createBobTree(), "Hier_2013"));
