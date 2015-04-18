@@ -83,7 +83,10 @@ public class OrganizationTree extends CustomComponent {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 Employee e = (Employee) tree.getValue();
+                if (e!=null) {
                 controller.employeeSelected(e);
+
+                }
 
             }
         });

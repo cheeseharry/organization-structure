@@ -49,4 +49,9 @@ public class MainView extends UI {
     public void selectPersonOnForm(Person person) {
         personForm.selectPerson(person);
     }
+
+    public void clearForm() {
+        personForm.clearForm();
+
+    }
 }

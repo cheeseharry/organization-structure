@@ -37,9 +37,13 @@ public class Controller {
     }
 
     public void employeeSelected(Employee e) {
-        Person person = personService.findPerson(e.getId());
+        if (e != null) {
+            Person person = personService.findPerson(e.getId());
+            mainView.selectPersonOnForm(person);
+        } else {
+            mainView.clearForm();
+        }
 
-        mainView.selectPersonOnForm(person);
     }
 
     public void injectView(MainView mainView) {

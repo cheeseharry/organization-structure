@@ -49,4 +49,8 @@ public class PersonForm extends CustomComponent {
     public void selectPerson(Person person) {
         binder.setItemDataSource(person);
     }
+
+    public void clearForm() {
+        binder.setItemDataSource(new Person());
+    }
 }
