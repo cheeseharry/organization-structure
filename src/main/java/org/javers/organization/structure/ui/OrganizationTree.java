@@ -10,8 +10,11 @@ import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptAll;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.shared.ui.dd.VerticalDropLocation;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
@@ -24,14 +27,16 @@ public class OrganizationTree extends CustomComponent {
 
     private final VerticalLayout verticalLayout = new VerticalLayout();
     private final ComboBox comboBox = new ComboBox();
-    ;
     private final Tree tree = new Tree();
+    private final CheckBox checkBoxEdit = new CheckBox("Edit", false);
     private final HierarchicalContainer container = new HierarchicalContainer();
 
     private List<Hierarchy> hierarchies;
     private Hierarchy selected;
 
     public OrganizationTree(Controller controller) {
+        tree.setEnabled(false);
+
         Panel panel = new Panel();
         panel.setHeight("650px");
         verticalLayout.setMargin(true);
@@ -39,7 +44,17 @@ public class OrganizationTree extends CustomComponent {
         setCompositionRoot(panel);
         setSizeFull();
         tree.setSizeFull();
-        verticalLayout.addComponent(comboBox);
+        HorizontalLayout hl = new HorizontalLayout();
+        hl.addComponent(comboBox);
+        hl.addComponent(checkBoxEdit);
+        hl.setComponentAlignment(checkBoxEdit, Alignment.MIDDLE_RIGHT);
+        hl.setWidth("100%");
+
+        checkBoxEdit.addValueChangeListener(l -> {
+            tree.setEnabled(checkBoxEdit.getValue());
+        });
+
+        verticalLayout.addComponent(hl);
         verticalLayout.addComponent(tree);
 
         hierarchies = controller.getHierarchyList();
@@ -143,7 +158,9 @@ public class OrganizationTree extends CustomComponent {
             Employee target = (Employee) container.getParent(sourceItemId);
 
             source.setBoss(target);
-            target.addSubordinate(source);
+            if (target != null) {
+                target.addSubordinate(source);
+            }
             controller.updateHierarchy(selected);
         }
 
