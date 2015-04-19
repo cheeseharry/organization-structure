@@ -38,8 +38,10 @@ public class AuditController {
     }
 
     @RequestMapping(value = "/persons/changes", method = RequestMethod.GET)
-    public String getAllPersonChanges(@RequestParam String property) {
-        QueryBuilder queryBuilder = QueryBuilder.byClass(Person.class).andProperty(property);
+    public String getAllPersonChanges(@RequestParam Optional<String> property) {
+        QueryBuilder queryBuilder = QueryBuilder.byClass(Person.class);
+
+        queryBuilder = property.isPresent() ? queryBuilder.andProperty(property.get()) : queryBuilder;
 
         JqlQuery<Person> jqlQuery = queryBuilder.build();
 
