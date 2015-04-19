@@ -23,10 +23,11 @@ public class JaversFactory implements FactoryBean<Javers>{
     public Javers getObject() throws Exception {
         JaversRepository javersRepository = new MongoRepository(db);
 
-        return JaversBuilder
-                .javers()
+        Javers javers = JaversBuilder.javers()
                 .registerJaversRepository(javersRepository)
                 .build();
+
+        return javers;
     }
 
     @Override

@@ -1,12 +1,16 @@
 package org.javers.organization.structure.audit;
 
+
 import org.javers.core.Javers;
 import org.javers.core.diff.Change;
 import org.javers.core.diff.Diff;
+import org.javers.core.diff.changetype.NewObject;
 import org.javers.core.json.JsonConverter;
-import org.javers.organization.structure.domain.Employee;
-import org.javers.organization.structure.domain.HierarchyRepository;
+import org.javers.core.metamodel.object.CdoSnapshot;
+import org.javers.organization.structure.domain.Hierarchy;
+import org.javers.organization.structure.domain.HierarchyService;
 import org.javers.organization.structure.domain.Person;
+import org.javers.repository.jql.JqlQuery;
 import org.javers.repository.jql.QueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,68 +23,99 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/rest/audit")
+@RequestMapping("/audit")
 public class AuditController {
 
     private Javers javers;
-
-    private HierarchyRepository hierarchyRepository;
+    private JsonConverter jsonConverter;
+    private HierarchyService hierarchyService;
 
     @Autowired
-    public AuditController(Javers javers, HierarchyRepository hierarchyRepository) {
+    public AuditController(Javers javers, HierarchyService hierarchyService) {
         this.javers = javers;
-        this.hierarchyRepository = hierarchyRepository;
+        this.hierarchyService = hierarchyService;
+        jsonConverter = javers.getJsonConverter();
     }
 
-    @RequestMapping(value = "/employees/changes", method = RequestMethod.GET)
-    public String getAllPersonsHistory(@RequestParam(value = "property") Optional<String> property) {
-        QueryBuilder jqlQueryBuilder = QueryBuilder.byClass(Person.class)
-                .withNewObjectChanges()
-                .limit(20);
+    @RequestMapping(value = "/persons/changes", method = RequestMethod.GET)
+    public String getAllPersonChanges(@RequestParam String property) {
+        QueryBuilder queryBuilder = QueryBuilder.byClass(Person.class).andProperty(property);
 
-        jqlQueryBuilder = property.isPresent() ? jqlQueryBuilder.andProperty(property.get()) : jqlQueryBuilder;
+        JqlQuery<Person> jqlQuery = queryBuilder.build();
 
-        JsonConverter jsonConverter = javers.getJsonConverter();
+        List<Change> changes = javers.findChanges(jqlQuery);
 
-        List<Change> changes = javers.findChanges(jqlQueryBuilder.build());
-
-        changes.sort((o1, o2) -> -1 * o1.getCommitMetadata().get().getCommitDate().compareTo(o2.getCommitMetadata().get().getCommitDate()));
+        changes.sort(((o1, o2) -> -1 * o1.getCommitMetadata().get().getCommitDate().compareTo(o2.getCommitMetadata().get().getCommitDate())));
 
         return jsonConverter.toJson(changes);
     }
 
-    @RequestMapping(value = "/employees/{id}/changes", method = RequestMethod.GET)
-    public String getPersonHistory(@PathVariable long id, @RequestParam(value = "property") Optional<String> property) {
-        QueryBuilder jqlQueryBuilder = QueryBuilder.byInstanceId(id, Person.class)
-        .withNewObjectChanges()
-        .limit(20);
+    @RequestMapping(value = "/persons/{login}/changes", method = RequestMethod.GET)
+    public String getPersonChanges(@PathVariable String login, @RequestParam Optional<String> property) {
+        QueryBuilder queryBuilder = QueryBuilder.byInstanceId(login, Person.class);
 
-        jqlQueryBuilder = property.isPresent() ? jqlQueryBuilder.andProperty(property.get()) : jqlQueryBuilder;
+        queryBuilder = property.isPresent() ? queryBuilder.andProperty(property.get()) : queryBuilder;
 
-        JsonConverter jsonConverter = javers.getJsonConverter();
+        JqlQuery<Person> jqlQuery = queryBuilder.build();
 
-        List<Change> changes = javers.findChanges(jqlQueryBuilder.build());
+        List<Change> changes = javers.findChanges(jqlQuery);
+
+        changes.sort(((o1, o2) -> -1 * o1.getCommitMetadata().get().getCommitDate().compareTo(o2.getCommitMetadata().get().getCommitDate())));
+
         return jsonConverter.toJson(changes);
     }
 
-    @RequestMapping(value = "/hierarchy/{left}/diff/{right}")
-    public String hierarchyDiff(@PathVariable String left, @PathVariable String right) {
-        Diff diff = javers.compare(hierarchyRepository.find(left), hierarchyRepository.find(right));
+    @RequestMapping(value = "/persons/snapshots", method = RequestMethod.GET)
+    public String getAllPersonSnapshots(@RequestParam Optional<String> property) {
+        QueryBuilder queryBuilder = QueryBuilder.byClass(Person.class);
 
-        JsonConverter jsonConverter = javers.getJsonConverter();
+        queryBuilder = property.isPresent() ? queryBuilder.andProperty(property.get()) : queryBuilder;
+
+        JqlQuery<Person> jqlQuery = queryBuilder.build();
+
+        List<CdoSnapshot> changes = javers.findSnapshots(jqlQuery);
+
+        changes.sort(((o1, o2) -> -1 * o1.getCommitMetadata().getCommitDate().compareTo(o2.getCommitMetadata().getCommitDate())));
+
+        return jsonConverter.toJson(changes);
+    }
+
+    @RequestMapping(value = "/persons/{login}/snapshots", method = RequestMethod.GET)
+    public String getPersonSnapshots(@PathVariable String login, @RequestParam Optional<String> property) {
+
+        QueryBuilder queryBuilder = QueryBuilder.byInstanceId(login, Person.class);
+
+        queryBuilder = property.isPresent() ? queryBuilder.andProperty(property.get()) : queryBuilder;
+
+        JqlQuery<Person> jqlQuery = queryBuilder.build();
+
+        List<CdoSnapshot> changes = javers.findSnapshots(jqlQuery);
+
+        changes.sort(((o1, o2) -> -1 * o1.getCommitMetadata().getCommitDate().compareTo(o2.getCommitMetadata().getCommitDate())));
+
+        return jsonConverter.toJson(changes);
+    }
+
+    @RequestMapping(value = "hierarchy/{left}/diff/{right}", method = RequestMethod.GET)
+    public String diffHierarchy(@PathVariable String left, @PathVariable String right) {
+        Hierarchy l = hierarchyService.find(left);
+        Hierarchy r = hierarchyService.find(right);
+
+        Diff diff = javers.compare(l, r);
         return jsonConverter.toJson(diff);
-
     }
 
-    @RequestMapping(value = "/employees/{employee}/snapshots")
-    public String hierarchyDiff2(@PathVariable String employee) {
-        QueryBuilder jqlQueryBuilder = QueryBuilder.byInstanceId(employee, Employee.class)
-                .withNewObjectChanges()
-                .limit(20);
+    @RequestMapping(value = "hierarchy/{left}/diff/{right}/newEmployees", method = RequestMethod.GET)
+    public String newEmployeesHierarchy(@PathVariable String left, @PathVariable String right) {
+        Hierarchy l = hierarchyService.find(left);
+        Hierarchy r = hierarchyService.find(right);
 
-        JsonConverter jsonConverter = javers.getJsonConverter();
-        return jsonConverter.toJson(javers.findSnapshots(jqlQueryBuilder.build()));
+        Diff diff = javers.compare(l, r);
 
+        List<Change> changes = diff.getChanges(input ->
+                (input instanceof NewObject
+                        && input.getAffectedGlobalId().getCdoClass().getClientsClass() != Hierarchy.class));
+
+        return jsonConverter.toJson(changes);
     }
-
 }

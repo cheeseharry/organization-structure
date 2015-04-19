@@ -9,15 +9,16 @@ import org.springframework.stereotype.Component;
 public class PersonService {
 
     private PersonRepository personRepository;
-    private UserContext userContext;
 
     private Javers javers;
 
+    private UserContext userContext;
+
     @Autowired
-    public PersonService(PersonRepository personRepository, UserContext userContext, Javers javers) {
+    public PersonService(PersonRepository personRepository, Javers javers, UserContext userContext) {
         this.personRepository = personRepository;
-        this.userContext = userContext;
         this.javers = javers;
+        this.userContext = userContext;
     }
 
     public void update(Person person) {
