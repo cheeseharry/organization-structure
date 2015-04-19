@@ -43,6 +43,13 @@ public class MongoHierarchyRepository implements HierarchyRepository {
     }
 
     @Override
+    public Hierarchy find(String hierarchyName) {
+        DBObject dbObject = db.getCollection(COLLECTION_NAME).findOne(new BasicDBObject("hierarchyName", hierarchyName));
+
+        return gson.fromJson(JSON.serialize(dbObject), Hierarchy.class);
+    }
+
+    @Override
     public void update(Hierarchy selected) {
         db.getCollection(COLLECTION_NAME)
                 .findAndModify(new BasicDBObject("hierarchyName", selected.getHierarchyName()), (DBObject) JSON.parse(gson.toJson(selected)));

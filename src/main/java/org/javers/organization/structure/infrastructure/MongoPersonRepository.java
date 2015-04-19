@@ -28,7 +28,7 @@ public class MongoPersonRepository implements PersonRepository {
     @Override
     public void update(Person person) {
         DBCollection collection = mongo.getCollection(COLLECTION_NAME);
-        DBObject retrived = collection.findOne(new BasicDBObject("id", person.getId()));
+        DBObject retrived = collection.findOne(new BasicDBObject("login", person.getLogin()));
         collection.update(retrived, (DBObject) JSON.parse(gson.toJson(person)));
     }
 
@@ -39,8 +39,8 @@ public class MongoPersonRepository implements PersonRepository {
     }
 
     @Override
-    public Person find(long id) {
-        DBObject dbObject = mongo.getCollection(COLLECTION_NAME).findOne(new BasicDBObject("id", id));
+    public Person find(String login) {
+        DBObject dbObject = mongo.getCollection(COLLECTION_NAME).findOne(new BasicDBObject("login", login));
 
         return gson.fromJson(JSON.serialize(dbObject), Person.class);
     }

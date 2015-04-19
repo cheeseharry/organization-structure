@@ -2,11 +2,13 @@ package org.javers.organization.structure.infrastructure;
 
 import com.google.gwt.thirdparty.guava.common.collect.Lists;
 import com.mongodb.DB;
+import org.javers.core.Javers;
 import org.javers.organization.structure.domain.Employee;
 import org.javers.organization.structure.domain.Hierarchy;
 import org.javers.organization.structure.domain.Person;
 import org.javers.organization.structure.domain.Sex;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -33,6 +35,12 @@ public class DataInitializer {
     Person kaz;
     Person stef;
     Person bob;
+
+    Person stanMarsh;
+    Person kyleBroflovski;
+    Person ericCartman;
+    Person kennyMcCormick;
+
     List<Person> persons;
 
     Employee eFrodo;
@@ -46,18 +54,30 @@ public class DataInitializer {
     Employee eStef;
     Employee eBob;
 
+    Employee eStanMarsh;
+    Employee eKyleBroflovski;
+    Employee eEricCartman;
+    Employee eKennyMcCormick;
+
+
     public DataInitializer() {
-        frodo = new Person(1l, "frodo", "Frodo", "Baggins", Sex.MALE).assignPosition(DEVELOPER, 9_000);
-        bilbo = new Person(2l, "bilbo", "Bilbo", "Baggins", Sex.MALE).assignPosition(SCRUM_MASTER, 10_000);
-        sam = new Person(3l, "sam", "Sam", "Gamgee", Sex.MALE).assignPosition(DEVELOPER, 11_000);
-        merry = new Person(4l, "merry", "Meriadoc", "Brandybuck", Sex.MALE).assignPosition(DEVELOPER, 12_000);
-        lucy = new Person(5l, "lucy", "Lucy","Valinor", Sex.FEMALE).assignPosition(TEAM_LEAD, 13_000);
-        eva = new Person(6l, "eva", "Eva","Celebrimbor", Sex.FEMALE).assignPosition(TEAM_LEAD, 14_000);
-        charlie = new Person(7l, "charlie","Charlie","Big", Sex.MALE).assignPosition(TEAM_LEAD, 15_000);
-        kaz = new Person(8l, "kaz", "Mad","Kaz", Sex.MALE).assignPosition(IT_MANAGER, 16_000);
-        stef = new Person(9l, "stef", "Crazy","Stefan", Sex.MALE).assignPosition(IT_MANAGER, 17_000);
-        bob = new Person(10l, "bob", "Uncle","Bob", Sex.MALE).assignPosition(CTO, 20_000);
-        persons = Lists.newArrayList(frodo, bilbo, sam, merry, lucy, eva, charlie, kaz, stef, bob);
+        frodo = new Person("frodo", "Frodo", "Baggins", Sex.MALE).assignPosition(DEVELOPER, 9_000);
+        bilbo = new Person("bilbo", "Bilbo", "Baggins", Sex.MALE).assignPosition(SCRUM_MASTER, 10_000);
+        sam = new Person("sam", "Sam", "Gamgee", Sex.MALE).assignPosition(DEVELOPER, 11_000);
+        merry = new Person("merry", "Meriadoc", "Brandybuck", Sex.MALE).assignPosition(DEVELOPER, 12_000);
+        lucy = new Person("lucy", "Lucy","Valinor", Sex.FEMALE).assignPosition(TEAM_LEAD, 13_000);
+        eva = new Person("eva", "Eva","Celebrimbor", Sex.FEMALE).assignPosition(TEAM_LEAD, 14_000);
+        charlie = new Person("charlie","Charlie","Big", Sex.MALE).assignPosition(TEAM_LEAD, 15_000);
+        kaz = new Person("kaz", "Mad","Kaz", Sex.MALE).assignPosition(IT_MANAGER, 16_000);
+        stef = new Person("stef", "Crazy","Stefan", Sex.MALE).assignPosition(IT_MANAGER, 17_000);
+        bob = new Person("bob", "Uncle","Bob", Sex.MALE).assignPosition(CTO, 20_000);
+
+        stanMarsh = new Person("stan_m", "Stan", "Marsh", Sex.MALE).assignPosition(DEVELOPER, 9_000);
+        kyleBroflovski = new Person("kyle_b", "Kyle", "Broflovski", Sex.MALE).assignPosition(DEVELOPER, 9_000);
+        ericCartman = new Person("eric_c", "Eric", "Cartman", Sex.MALE).assignPosition(DEVELOPER, 9_000);
+        kennyMcCormick = new Person("kenny_m", "Kenny", "McCormick", Sex.MALE).assignPosition(DEVELOPER, 9_000);
+
+        persons = Lists.newArrayList(frodo, bilbo, sam, merry, lucy, eva, charlie, kaz, stef, bob, stanMarsh, kyleBroflovski, ericCartman, kennyMcCormick);
 
         eFrodo = frodo.toEmployee();
         eBilbo = bilbo.toEmployee();
@@ -69,6 +89,11 @@ public class DataInitializer {
         eKaz = kaz.toEmployee();
         eStef = stef.toEmployee();
         eBob = bob.toEmployee();
+
+        eStanMarsh = stanMarsh.toEmployee();
+        eKyleBroflovski = kyleBroflovski.toEmployee();
+        eEricCartman = ericCartman.toEmployee();
+        eKennyMcCormick = kennyMcCormick.toEmployee();
     }
 
     @Autowired
@@ -80,18 +105,54 @@ public class DataInitializer {
     @Autowired
     private DB db;
 
+    @Autowired
+    private Javers javers;
+
+    @Value("${datainitializer.populate}")
+    private boolean populate;
+
     public void populate() {
-        db.getCollection(Person.class.getSimpleName()).drop();
-        db.getCollection(Hierarchy.class.getSimpleName()).drop();
+        if (populate) {
 
-        persons.forEach(p -> mongoPersonRepository.save(p));
 
-        hierarchyRepository.save(new Hierarchy(createBobTree(), "Hier_2013"));
-        Employee bobNew = createBobTree();
-        Employee kazNew = bobNew.getSubordinate("kaz");
-        Employee stefNew = bobNew.getSubordinate("stef");
-        kazNew.addSubordinate(stefNew.getSubordinate("charlie"));
-        hierarchyRepository.save(new Hierarchy(bobNew,"Hier_2014"));
+            db.getCollection(Person.class.getSimpleName()).drop();
+            db.getCollection(Hierarchy.class.getSimpleName()).drop();
+            db.getCollection("jv_head_id").drop();
+            db.getCollection("jv_snapshots").drop();
+
+            persons.forEach(p -> {
+                mongoPersonRepository.save(p);
+                javers.commit("author", p);
+            });
+
+
+            eBob.addSubordinate(eLucy);
+            eBob.addSubordinate(eKaz);
+            Hierarchy hier_2013 = new Hierarchy(eBob, "Hier_2013");
+            hierarchyRepository.save(hier_2013);
+
+
+            Hierarchy hier_2014 = new Hierarchy(new DataInitializer().createBobTree(), "Hier_2014");
+            hierarchyRepository.save(hier_2014);
+            javers.commit("author", hier_2014);
+
+
+            Employee bobNew = new DataInitializer().createBobTree();
+            Employee kazNew = bobNew.getSubordinate("kaz");
+            Employee stefNew = bobNew.getSubordinate("stef");
+            kazNew.addSubordinate(stefNew.getSubordinate("charlie"));
+
+            eEricCartman.addSubordinate(eStanMarsh);
+            eEricCartman.addSubordinate(eKyleBroflovski);
+            eEricCartman.addSubordinate(eKennyMcCormick);
+
+            bobNew.addSubordinate(eEricCartman);
+
+
+            Hierarchy hier_2015 = new Hierarchy(bobNew, "Hier_2015");
+            hierarchyRepository.save(hier_2015);
+            javers.commit("author", hier_2015);
+        }
     }
 
     public  Employee createBobTree() {
@@ -99,6 +160,7 @@ public class DataInitializer {
         eEva.addSubordinates(Lists.newArrayList(eSam, eMerry));
         eKaz.addSubordinates(Lists.newArrayList(eLucy, eEva));
         eStef.addSubordinate(eCharlie);
-        return eBob.addSubordinates(Lists.newArrayList(eKaz, eStef));
+        eBob.addSubordinates(Lists.newArrayList(eKaz, eStef));
+        return eBob;
     }
 }

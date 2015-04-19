@@ -38,7 +38,7 @@ public class Controller {
 
     public void employeeSelected(Employee e) {
         if (e != null) {
-            Person person = personService.findPerson(e.getId());
+            Person person = personService.findPerson(e.getLogin());
             mainView.selectPersonOnForm(person);
         } else {
             mainView.clearForm();

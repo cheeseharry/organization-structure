@@ -77,7 +77,7 @@ public class OrganizationTree extends CustomComponent {
         tree.setContainerDataSource(container);
         tree.setItemCaptionPropertyId("login");
         tree.setDragMode(Tree.TreeDragMode.NODE);
-        tree.setDropHandler(new TreeSortDropHandler(tree, container, selected, controller));
+        tree.setDropHandler(new TreeSortDropHandler(tree));
 
         tree.addValueChangeListener(new Property.ValueChangeListener() {
             @Override
@@ -97,6 +97,8 @@ public class OrganizationTree extends CustomComponent {
     private void populateContainer(Hierarchy first) {
         Employee root = first.getRoot();
 
+        Item item = container.addItem(root);
+        item.getItemProperty("login").setValue(root.getLogin());
         addSubordinates(root);
         tree.rootItemIds().forEach(i -> tree.expandItemsRecursively(i));
     }
@@ -113,21 +115,9 @@ public class OrganizationTree extends CustomComponent {
     //MAGIC
     private static class TreeSortDropHandler implements DropHandler {
         private final Tree tree;
-        private final HierarchicalContainer container;
-        private final Hierarchy selected;
-        private final Controller controller;
 
-        /**
-         * Tree must use {@link HierarchicalContainer}.
-         *
-         * @param tree
-         * @param selected
-         */
-        public TreeSortDropHandler(final Tree tree, final HierarchicalContainer container, Hierarchy selected, Controller controller) {
+        public TreeSortDropHandler(final Tree tree) {
             this.tree = tree;
-            this.container = container;
-            this.selected = selected;
-            this.controller = controller;
         }
 
         @Override
@@ -149,22 +139,8 @@ public class OrganizationTree extends CustomComponent {
             final Object targetItemId = dropData.getItemIdOver();
             final VerticalDropLocation location = dropData.getDropLocation();
 
-            Employee source = (Employee) sourceItemId;
-            Employee oldBoss = (Employee) container.getParent(sourceItemId);
-            if (oldBoss != null) {
-                oldBoss.removeSubordinate(source);
-            }
 
             moveNode(sourceItemId, targetItemId, location);
-
-
-            Employee target = (Employee) container.getParent(sourceItemId);
-
-            source.setBoss(target);
-            if (target != null) {
-                target.addSubordinate(source);
-            }
-            controller.updateHierarchy(selected);
         }
 
         /**

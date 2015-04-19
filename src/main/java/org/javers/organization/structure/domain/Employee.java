@@ -1,5 +1,6 @@
 package org.javers.organization.structure.domain;
 
+import javax.persistence.Id;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,14 +10,13 @@ import java.util.List;
 //@Document
 public class Employee {
 
-    private long id;
+    @Id
     private String login;
     private transient Employee boss;
 
     private List<Employee> subordinates = new ArrayList<>();
 
-    public Employee(long id, String login) {
-        this.id = id;
+    public Employee(String login) {
         this.login = login;
     }
 
@@ -54,10 +54,6 @@ public class Employee {
 
     public Employee getSubordinate(String name) {
         return subordinates.stream().filter(s -> s.getLogin().equals(name)).findFirst().get();
-    }
-
-    public long getId() {
-        return id;
     }
 }
 

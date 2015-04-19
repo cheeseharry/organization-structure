@@ -6,5 +6,5 @@ public interface PersonRepository {
 
     void save(Person person);
 
-    Person find(long id);
+    Person find(String login);
 }

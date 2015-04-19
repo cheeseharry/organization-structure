@@ -8,5 +8,7 @@ public interface HierarchyRepository {
 
     List<Hierarchy> findAll();
 
+    Hierarchy find(String id);
+
     void update(Hierarchy hierachy);
 }

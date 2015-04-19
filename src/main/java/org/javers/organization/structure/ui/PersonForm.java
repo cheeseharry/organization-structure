@@ -40,7 +40,7 @@ public class PersonForm extends CustomComponent {
         save.addClickListener(event -> {
             BeanFieldGroup<Person> b = binder;
             Person p = b.getItemDataSource().getBean();
-            if (p.getId()!=null) {
+            if (p.getLogin()!=null) {
                 controller.updatePerson(p);
             }
         });
