@@ -20,10 +20,13 @@ public class HierarchyService {
     }
 
     public void update(Hierarchy selected) {
-        hierarchyRepository.update(selected);
+        //TODO
+        Hierarchy found = hierarchyRepository.findOne(selected.getHierarchyName());
+
+        hierarchyRepository.save(selected);
     }
 
     public Hierarchy find(String left) {
-        return hierarchyRepository.find(left);
+        return hierarchyRepository.findOne(left);
     }
 }

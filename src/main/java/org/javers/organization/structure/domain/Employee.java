@@ -1,18 +1,20 @@
 package org.javers.organization.structure.domain;
 
-import javax.persistence.Id;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author bartosz walacik
  */
-//@Document
 public class Employee {
 
     @Id
     private String login;
-    private transient Employee boss;
+    @Transient
+    private Employee boss;
 
     private List<Employee> subordinates = new ArrayList<>();
 

@@ -1,14 +1,9 @@
 package org.javers.organization.structure.domain;
 
+import org.springframework.data.mongodb.repository.MongoRepository;
+
 import java.util.List;
 
-public interface HierarchyRepository {
+public interface HierarchyRepository extends MongoRepository<Hierarchy, String> {
 
-    void save(Hierarchy hierarchy);
-
-    List<Hierarchy> findAll();
-
-    Hierarchy find(String id);
-
-    void update(Hierarchy hierachy);
 }

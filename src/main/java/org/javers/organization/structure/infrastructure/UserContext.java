@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserContext {
 
-    public String getLoggedUser() {
+    public String getLoggedInUser() {
         return "mr Bean";
     }
 }

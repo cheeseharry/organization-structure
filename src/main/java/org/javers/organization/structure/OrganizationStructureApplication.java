@@ -1,11 +1,12 @@
 package org.javers.organization.structure;
 
+import org.javers.spring.boot.mongo.JaversMongoAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
-@EnableAspectJAutoProxy
+@Import(value = JaversMongoAutoConfiguration.class)
 public class OrganizationStructureApplication {
 
     public static void main(String[] args) {

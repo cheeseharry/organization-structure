@@ -1,10 +1,7 @@
 package org.javers.organization.structure.domain;
 
-public interface PersonRepository {
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-    void update(Person person);
+public interface PersonRepository extends MongoRepository<Person, String> {
 
-    void save(Person person);
-
-    Person find(String login);
 }

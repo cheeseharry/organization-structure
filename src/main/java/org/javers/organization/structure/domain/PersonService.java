@@ -10,20 +10,19 @@ public class PersonService {
 
     private PersonRepository personRepository;
 
-    private UserContext userContext;
-
     @Autowired
-    public PersonService(PersonRepository personRepository, UserContext userContext) {
+    public PersonService(PersonRepository personRepository) {
         this.personRepository = personRepository;
-        this.userContext = userContext;
     }
 
     @JaversAuditable
     public void update(Person person) {
-        personRepository.update(person);
+        //TODO check
+
+        personRepository.save(person);
     }
 
     public Person findPerson(String login) {
-        return personRepository.find(login);
+        return personRepository.findOne(login);
     }
 }

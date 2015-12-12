@@ -1,6 +1,6 @@
 package org.javers.organization.structure.domain;
 
-import javax.persistence.Id;
+import org.springframework.data.annotation.Id;
 
 /**
  * @author bartosz walacik
